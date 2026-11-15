@@ -1,0 +1,42 @@
+version: 2
+
+models:
+  - name: dim_indicador
+    description: Dimensão com os metadados de cada indicador.
+    columns:
+      - name: id_serie
+        data_tests: [unique, not_null]
+
+  - name: fct_indicadores
+    description: Fato diário em formato longo (um registro por indicador e data).
+    columns:
+      - name: sk_indicador_dia
+        data_tests: [unique, not_null]
+      - name: id_serie
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 432, 433]
+          - relationships:
+              arguments:
+                to: ref('dim_indicador')
+                field: id_serie
+      - name: data_referencia
+        data_tests: [not_null]
+      - name: valor
+        data_tests: [not_null]
+
+  - name: mart_indicadores_diarios
+    description: Dólar e Selic diários, com média móvel, variações e flag de alerta.
+    columns:
+      - name: data_referencia
+        data_tests: [unique, not_null]
+      - name: dolar
+        data_tests: [not_null]
+
+  - name: mart_ipca_mensal
+    description: IPCA mensal e acumulado em 12 meses.
+    columns:
+      - name: mes_referencia
+        data_tests: [unique, not_null]

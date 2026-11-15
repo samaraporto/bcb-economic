@@ -1,0 +1,4 @@
+codigo,nome,descricao,unidade,frequencia
+1,dolar_venda,Dólar comercial (venda) - PTAX,R$/US$,diaria
+432,selic_meta,Meta da taxa Selic definida pelo Copom,% a.a.,diaria
+433,ipca_mensal,IPCA - variação mensal,% a.m.,mensal

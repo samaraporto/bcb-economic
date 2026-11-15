@@ -1,0 +1,8 @@
+bcb_indicadores:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      # O warehouse é descartável: é reconstruído a partir da camada bronze a cada execução.
+      path: "{{ env_var('DUCKDB_PATH', '../warehouse/indicadores.duckdb') }}"
+      threads: 1

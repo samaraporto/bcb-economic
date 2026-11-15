@@ -1,0 +1,12 @@
+version: 2
+
+models:
+  - name: stg_sgs_series
+    description: Séries do SGS tipadas e deduplicadas (último registro ingerido por série e data).
+    columns:
+      - name: id_serie
+        data_tests: [not_null]
+      - name: data_referencia
+        data_tests: [not_null]
+      - name: valor
+        data_tests: [not_null]

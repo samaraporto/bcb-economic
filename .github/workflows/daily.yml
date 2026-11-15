@@ -1,0 +1,67 @@
+name: pipeline-diario
+
+on:
+  schedule:
+    - cron: "0 11 * * 1-5" # 08:00 em Brasília, dias úteis
+  workflow_dispatch:
+    inputs:
+      backfill:
+        description: "Carga histórica completa (desde 2015)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: pipeline
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write # para commitar a camada bronze
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Ingestão (API do BCB -> bronze)
+        run: python -m ingestion.ingest ${{ inputs.backfill && '--backfill' || '' }}
+
+      - name: Transformação e testes (dbt build)
+        working-directory: dbt_project
+        run: dbt build --profiles-dir .
+
+      # Só persiste os dados novos se os testes de qualidade passaram.
+      - name: Commitar camada bronze
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/bronze
+          git diff --cached --quiet || git commit -m "data: ingestão $(date -u +%F)"
+          git push
+
+      - name: Gerar dashboard
+        run: python dashboard/build_dashboard.py --db warehouse/indicadores.duckdb --out site/index.html
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: run
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

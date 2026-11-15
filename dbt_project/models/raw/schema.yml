@@ -1,0 +1,5 @@
+version: 2
+
+models:
+  - name: raw_sgs_series
+    description: Dados brutos da API SGS do Banco Central, lidos dos arquivos JSONL da camada bronze.

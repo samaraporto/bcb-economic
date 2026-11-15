@@ -1,0 +1,33 @@
+name: bcb_indicadores
+version: "1.0.0"
+config-version: 2
+profile: bcb_indicadores
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+
+vars:
+  # Arquivos da camada bronze (relativo à pasta dbt_project)
+  bronze_glob: "../data/bronze/sgs/*/*/data.jsonl"
+  limite_alerta_pct: 2 # variação diária do dólar (%) que dispara alerta
+
+models:
+  bcb_indicadores:
+    raw:
+      +materialized: table
+      +schema: raw
+    staging:
+      +materialized: view
+      +schema: staging
+    marts:
+      +materialized: table
+      +schema: marts
+
+seeds:
+  bcb_indicadores:
+    +schema: staging
+    indicadores:
+      +column_types:
+        codigo: integer
